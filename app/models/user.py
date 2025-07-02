@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime, Enum
-from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -17,7 +16,7 @@ class User(db.Model):
     full_name = Column(String(120), nullable=False)
     country = Column(String(2), nullable=True)  # ISO-3166-1 alpha-2
     city = Column(String(80), nullable=True)
-    photo_url = Column(LONGTEXT, nullable=True)
+    photo_url = Column(Text, nullable=True)
     auth_provider = Column(Enum('local', 'google', name='auth_provider_enum'), nullable=False, default='local')
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

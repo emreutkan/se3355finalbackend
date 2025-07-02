@@ -19,13 +19,14 @@ def init_database(app):
                 init()
                 logger.info("[+] Migrations directory created")
 
-            # Check if database tables exist by trying a simple query
+            # Check if database tables exist by checking if alembic version table exists
             try:
                 from .. import db
-                from ..models import User
-                db.session.execute(db.text("SELECT 1 FROM users LIMIT 1"))
-                logger.info("[+] Database tables already exist")
-                return True
+                # Check if alembic version table exists - this indicates migrations have been run
+                result = db.session.execute(db.text("SELECT COUNT(*) FROM alembic_version"))
+                if result.scalar() > 0:
+                    logger.info("[+] Database tables already exist")
+                    return True
                 
             except Exception:
                 logger.info("[-] Database tables don't exist, creating them...")
