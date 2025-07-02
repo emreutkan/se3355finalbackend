@@ -34,7 +34,7 @@ def create_app():
         api_host = os.environ.get('PRODUCTION_API_HOST', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
         schemes = ["https", "http"]
     else:
-        api_host = f"localhost:{os.environ.get('FLASK_PORT', '8000')}"
+        api_host = f"https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
         schemes = ["http", "https"]
     
     # Initialize Swagger for API documentation
