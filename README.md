@@ -8,6 +8,9 @@
 - **Live URL**: https://thankful-cliff-012dd3803.1.azurestaticapps.net/
 - **Repository**: https://github.com/emreutkan/se3355website
 
+## Demo Video
+- **YouTube**: [Watch the Demo](https://www.youtube.com/watch?v=34wobgofPR0)
+
 ---
 
 # IMDB Clone API
