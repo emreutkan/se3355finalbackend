@@ -50,7 +50,7 @@ class Config:
         BACKEND_URL = os.environ.get('PRODUCTION_BACKEND_URL', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
         FRONTEND_URL = os.environ.get('PRODUCTION_FRONTEND_URL', 'https://proud-ground-0a0435f03.2.azurestaticapps.net')
     else:
-        BACKEND_URL = os.environ.get('LOCAL_BACKEND_URL', 'http://localhost:5000')
+        BACKEND_URL = os.environ.get('LOCAL_BACKEND_URL', 'http://localhost:8000')
         FRONTEND_URL = os.environ.get('LOCAL_FRONTEND_URL', 'http://localhost:4200')
 
     # Google OAuth configuration
@@ -78,7 +78,7 @@ class Config:
         if api_environment == 'production':
             return os.environ.get('PRODUCTION_API_HOST', 'be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
         else:
-            return f"localhost:{os.environ.get('FLASK_PORT', '5000')}"
+            return f"localhost:{os.environ.get('FLASK_PORT', '8000')}"
     
     @staticmethod
     def get_api_schemes():

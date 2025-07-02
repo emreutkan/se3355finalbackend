@@ -48,7 +48,7 @@ if __name__ == '__main__':
     # Get Flask run parameters
     debug = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
     host = os.environ.get('FLASK_HOST', '0.0.0.0')
-    port = int(os.environ.get('FLASK_PORT', 5000))
+    port = int(os.environ.get('FLASK_PORT', 8000))
 
     # Display startup information
     print("="*70)

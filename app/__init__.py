@@ -34,7 +34,7 @@ def create_app():
         api_host = os.environ.get('PRODUCTION_API_HOST', 'be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
         schemes = ["https", "http"]
     else:
-        api_host = f"localhost:{os.environ.get('FLASK_PORT', '5000')}"
+        api_host = f"localhost:{os.environ.get('FLASK_PORT', '8000')}"
         schemes = ["http", "https"]
     
     # Initialize Swagger for API documentation
@@ -198,7 +198,7 @@ def create_app():
                   example: "local"
                 host:
                   type: string
-                  example: "localhost:5000"
+                  example: "localhost:8000"
         """
         return jsonify({
             'status': 'healthy',
@@ -228,7 +228,7 @@ def create_app():
                   example: "local"
                 api_host:
                   type: string
-                  example: "localhost:5000"
+                  example: "localhost:8000"
                 schemes:
                   type: array
                   items:
@@ -236,7 +236,7 @@ def create_app():
                   example: ["http", "https"]
                 swagger_url:
                   type: string
-                  example: "http://localhost:5000/swagger/"
+                  example: "http://localhost:8000/swagger/"
                 base_path:
                   type: string
                   example: "/api"
