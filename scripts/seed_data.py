@@ -10,6 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import create_app, db
 from app.models import Movie, Actor, MovieActor, User, Rating, PopularitySnapshot, Watchlist, Category, MovieCategory
 
+
 def create_sample_movies():
     """Create sample movies"""
     movies_data = [
@@ -36,7 +37,7 @@ def create_sample_movies():
             'summary_tr': 'Yaşlanan bir organize suç hanedanının reisi, gizli imparatorluğunun kontrolünü isteksiz oğluna devreder.',
             'imdb_score': 9.2, 'metascore': 100,
             'trailer_url': 'https://www.youtube.com/watch?v=sY1S34973zA',
-            'image_url': 'https://www.imdb.com/title/tt0068646/mediaviewer/rm746868224/?ref_=tt_ov_i',
+            'image_url': 'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg',
             'runtime_min': 175,
             'release_date': date(1972, 3, 24),
             'language': 'English'
@@ -235,6 +236,7 @@ def create_sample_movies():
     print(f"Created {len(movies)} movies")
     return movies
 
+
 def create_sample_categories():
     """Create sample categories"""
     category_names = [
@@ -250,16 +252,17 @@ def create_sample_categories():
             category = Category(name=name)
             db.session.add(category)
             categories.append(category)
-    
+
     db.session.commit()
     print(f"Created {len(categories)} categories")
     return Category.query.all()
 
+
 def create_movie_category_relationships(movies, categories):
     """Create relationships between movies and categories using actual genres."""
-    
+
     category_dict = {category.name: category for category in categories}
-    
+
     movie_to_categories_map = {
         'The Shawshank Redemption': ['Drama', 'Crime'],
         'The Godfather': ['Crime', 'Drama'],
@@ -290,43 +293,109 @@ def create_movie_category_relationships(movies, categories):
                     movie_category = MovieCategory(movie_id=movie.id, category_id=category.id)
                     movie_categories.append(movie_category)
                     db.session.add(movie_category)
-            
+
     db.session.commit()
     print(f"Created {len(movie_categories)} movie-category relationships")
+
 
 def create_sample_actors():
     """Create sample actors"""
     actors_data = [
-        {'full_name': 'Morgan Freeman',       'bio': 'Morgan Freeman is an American actor, director, and narrator.',              'birth_date': date(1937, 6, 1),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Morgan_Freeman_at_The_Pentagon_on_2_August_2023_-_230802-D-PM193-3363_%28cropped%29.jpg'},
-        {'full_name': 'Tim Robbins',          'bio': 'Tim Robbins is an American actor, screenwriter, director, producer, and musician.', 'birth_date': date(1958, 10, 16), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Tim_Robbins_%28Berlin_Film_Festival_2013%29.jpg'},
-        {'full_name': 'Marlon Brando',        'bio': 'Marlon Brando Jr. was an American actor and film director.',               'birth_date': date(1924, 4, 3),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/53/Marlon_Brando_publicity_for_One-Eyed_Jacks.png'},
-        {'full_name': 'Al Pacino',            'bio': 'Al Pacino is an American actor and filmmaker.',                           'birth_date': date(1940, 4, 25),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Al_Pacino_2016_%2830401544240%29.jpg'},
-        {'full_name': 'Christian Bale',       'bio': 'Christian Charles Philip Bale is an English actor.',                          'birth_date': date(1974, 1, 30),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Christian_Bale-7837.jpg'},
-        {'full_name': 'Heath Ledger',         'bio': 'Heath Andrew Ledger was an Australian actor and director.',                  'birth_date': date(1979, 4, 4),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/e/ee/Heath_Ledger%2C_2006.jpg'},
-        {'full_name': 'John Travolta',        'bio': 'John Travolta is an American actor, producer, dancer, and singer.',         'birth_date': date(1954, 2, 18),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/f/f1/John_Travolta_2018.jpg'},
-        {'full_name': 'Samuel L. Jackson',    'bio': 'Samuel L. Jackson is an American actor and producer.',                     'birth_date': date(1948, 12, 21), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Samuel_L._Jackson_2019_by_Glenn_Francis.jpg'},
-        {'full_name': 'Leonardo DiCaprio',    'bio': 'Leonardo DiCaprio is an American actor, producer, and environmentalist.',   'birth_date': date(1974, 11, 11),'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Leonardo_Dicaprio_C%C3%A9sar_2017.jpg'},
-        {'full_name': 'Tom Hanks',            'bio': 'Tom Hanks is an American actor and filmmaker.',                             'birth_date': date(1956, 7, 9),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Tom_Hanks_TIFF_2019.jpg'},
-        {'full_name': 'Liam Neeson',          'bio': 'Liam Neeson is an Irish actor known for both blockbuster and art house films.', 'birth_date': date(1952, 6, 7),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Liam_Neeson_in_2008.jpg'},
-        {'full_name': 'Ben Kingsley',         'bio': 'Sir Ben Kingsley is an English actor known for his versatile roles.',       'birth_date': date(1943, 12, 31), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Ben_Kingsley_Berlinale_2014_%28crop2%29.jpg'},
-        {'full_name': 'Joseph Gordon-Levitt', 'bio': 'Joseph Gordon-Levitt is an American actor and filmmaker.',                   'birth_date': date(1981, 2, 17),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Joseph_Gordon-Levitt_2016.jpg'},
-        {'full_name': 'Robin Wright',         'bio': 'Robin Wright is an American actress and director.',                         'birth_date': date(1966, 4, 8),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/43/Robin_Wright_TIFF_2017.jpg'},
-        {'full_name': 'Keanu Reeves',         'bio': 'Keanu Reeves is a Canadian actor known for action and dramatic roles.',     'birth_date': date(1964, 9, 2),   'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Keanu_Reeves_2014.jpg'},
-        {'full_name': 'Laurence Fishburne',   'bio': 'Laurence Fishburne is an American actor, playwright, and producer.',       'birth_date': date(1961, 7, 30),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Laurence_Fishburne_2013.jpg'},
-        {'full_name': 'Robert De Niro',       'bio': 'Robert De Niro is an American actor and producer, co-founder of TriBeCa Productions.', 'birth_date': date(1943, 8, 17),'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Robert_De_Niro_2012.jpg'},
-        {'full_name': 'Ray Liotta',           'bio': 'Ray Liotta was an American actor and film producer.',                      'birth_date': date(1954, 12, 18), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Ray_Liotta_by_Gage_Skidmore.jpg'},
-        {'full_name': 'Matthew McConaughey',  'bio': 'Matthew McConaughey is an American actor and producer.',                   'birth_date': date(1969, 11, 4),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Matthew_McConaughey_2020.jpg'},
-        {'full_name': 'Anne Hathaway',        'bio': 'Anne Hathaway is an American actress and singer.',                        'birth_date': date(1982, 11, 12), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Anne_Hathaway_Deauville_2016.jpg'},
-        {'full_name': 'Brad Pitt',            'bio': 'Brad Pitt is an American actor and film producer.',                       'birth_date': date(1963, 12, 18), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Brad_Pitt_2019_by_Glenn_Francis.jpg'},
-        {'full_name': 'Edward Norton',        'bio': 'Edward Norton is an American actor and filmmaker.',                        'birth_date': date(1969, 8, 18),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Edward_Norton_2015.jpg'},
-        {'full_name': 'Elijah Wood',          'bio': 'Elijah Wood is an American actor and producer.',                           'birth_date': date(1981, 1, 28),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Elijah_Wood_2014.jpg'},
-        {'full_name': 'Ian McKellen',         'bio': 'Sir Ian McKellen is an English actor known for fantasy and Shakespearean roles.', 'birth_date': date(1939, 5, 25), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Ian_McKellen_by_Gage_Skidmore.jpg'},
-        {'full_name': 'Jesse Eisenberg',      'bio': 'Jesse Eisenberg is an American actor and playwright.',                     'birth_date': date(1983, 10, 5),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/1/13/Jesse_Eisenberg_2012.jpg'},
-        {'full_name': 'Andrew Garfield',      'bio': 'Andrew Garfield is an English-American actor.',                            'birth_date': date(1983, 8, 20),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Andrew_Garfield_at_2011_Le_C%C3%A9sar_Awards.jpg'},
-        {'full_name': 'Jodie Foster',         'bio': 'Jodie Foster is an American actress, director, and producer.',             'birth_date': date(1962, 11, 19), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Jodie_Foster_2011.jpg'},
-        {'full_name': 'Anthony Hopkins',      'bio': 'Sir Anthony Hopkins is a Welsh actor, director, and composer.',            'birth_date': date(1937, 12, 31), 'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Anthony_Hopkins_2010.jpg'},
-        {'full_name': 'Mark Hamill',          'bio': 'Mark Hamill is an American actor and voice artist.',                      'birth_date': date(1951, 9, 25),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Mark_Hamill_%282014%29.jpg'},
-        {'full_name': 'Harrison Ford',        'bio': 'Harrison Ford is an American actor and film producer.',                   'birth_date': date(1942, 7, 13),  'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/9/97/Harrison_Ford_2018.jpg'},
+        {'full_name': 'Morgan Freeman', 'bio': 'Morgan Freeman is an American actor, director, and narrator.',
+         'birth_date': date(1937, 6, 1),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTc0MDMyMzI2OF5BMl5BanBnXkFtZTcwMzM2OTk1MQ@@._V1_.jpg'},
+        {'full_name': 'Tim Robbins',
+         'bio': 'Tim Robbins is an American actor, screenwriter, director, producer, and musician.',
+         'birth_date': date(1958, 10, 16),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTI1OTYxNzAxOF5BMl5BanBnXkFtZTYwNTE5ODI4._V1_FMjpg_UX1000_.jpg'},
+        {'full_name': 'Marlon Brando', 'bio': 'Marlon Brando Jr. was an American actor and film director.',
+         'birth_date': date(1924, 4, 3),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTg3MDYyMDE5OF5BMl5BanBnXkFtZTcwNjgyNTEzNA@@._V1_FMjpg_UX1000_.jpg'},
+        {'full_name': 'Al Pacino', 'bio': 'Al Pacino is an American actor and filmmaker.',
+         'birth_date': date(1940, 4, 25),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Al_Pacino.jpg/250px-Al_Pacino.jpg'},
+        {'full_name': 'Christian Bale', 'bio': 'Christian Charles Philip Bale is an English actor.',
+         'birth_date': date(1974, 1, 30),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTkxMzk4MjQ4MF5BMl5BanBnXkFtZTcwMzExODQxOA@@._V1_.jpg'},
+        {'full_name': 'Heath Ledger', 'bio': 'Heath Andrew Ledger was an Australian actor and director.',
+         'birth_date': date(1979, 4, 4),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTI2NTY0NzA4MF5BMl5BanBnXkFtZTYwMjE1MDE0._V1_FMjpg_UX1000_.jpg'},
+        {'full_name': 'John Travolta', 'bio': 'John Travolta is an American actor, producer, dancer, and singer.',
+         'birth_date': date(1954, 2, 18),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BNWUyNDZiMjItMjQzMy00YmQyLTliOTYtOGRkYzNhZTk5NDBiXkEyXkFqcGc@._V1_.jpg'},
+        {'full_name': 'Samuel L. Jackson', 'bio': 'Samuel L. Jackson is an American actor and producer.',
+         'birth_date': date(1948, 12, 21),
+         'photo_url': 'https://m.media-amazon.com/images/M/MV5BMTQ1NTQwMTYxNl5BMl5BanBnXkFtZTYwMjA1MzY1._V1_.jpg'},
+        {'full_name': 'Leonardo DiCaprio',
+         'bio': 'Leonardo DiCaprio is an American actor, producer, and environmentalist.',
+         'birth_date': date(1974, 11, 11),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Tom Hanks', 'bio': 'Tom Hanks is an American actor and filmmaker.',
+         'birth_date': date(1956, 7, 9),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Liam Neeson',
+         'bio': 'Liam Neeson is an Irish actor known for both blockbuster and art house films.',
+         'birth_date': date(1952, 6, 7),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Ben Kingsley', 'bio': 'Sir Ben Kingsley is an English actor known for his versatile roles.',
+         'birth_date': date(1943, 12, 31),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Joseph Gordon-Levitt', 'bio': 'Joseph Gordon-Levitt is an American actor and filmmaker.',
+         'birth_date': date(1981, 2, 17),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Robin Wright', 'bio': 'Robin Wright is an American actress and director.',
+         'birth_date': date(1966, 4, 8),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Keanu Reeves', 'bio': 'Keanu Reeves is a Canadian actor known for action and dramatic roles.',
+         'birth_date': date(1964, 9, 2),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Laurence Fishburne', 'bio': 'Laurence Fishburne is an American actor, playwright, and producer.',
+         'birth_date': date(1961, 7, 30),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Leonardo_Dicaprio_Cannes_2019.jpg'},
+        {'full_name': 'Robert De Niro',
+         'bio': 'Robert De Niro is an American actor and producer, co-founder of TriBeCa Productions.',
+         'birth_date': date(1943, 8, 17),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Robert_De_Niro_2012.jpg'},
+        {'full_name': 'Ray Liotta', 'bio': 'Ray Liotta was an American actor and film producer.',
+         'birth_date': date(1954, 12, 18),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Ray_Liotta_by_Gage_Skidmore.jpg'},
+        {'full_name': 'Matthew McConaughey', 'bio': 'Matthew McConaughey is an American actor and producer.',
+         'birth_date': date(1969, 11, 4),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Matthew_McConaughey_2020.jpg'},
+        {'full_name': 'Anne Hathaway', 'bio': 'Anne Hathaway is an American actress and singer.',
+         'birth_date': date(1982, 11, 12),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Anne_Hathaway_Deauville_2016.jpg'},
+        {'full_name': 'Brad Pitt', 'bio': 'Brad Pitt is an American actor and film producer.',
+         'birth_date': date(1963, 12, 18),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Brad_Pitt_2019_by_Glenn_Francis.jpg'},
+        {'full_name': 'Edward Norton', 'bio': 'Edward Norton is an American actor and filmmaker.',
+         'birth_date': date(1969, 8, 18),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Edward_Norton_2015.jpg'},
+        {'full_name': 'Elijah Wood', 'bio': 'Elijah Wood is an American actor and producer.',
+         'birth_date': date(1981, 1, 28),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Elijah_Wood_2014.jpg'},
+        {'full_name': 'Ian McKellen',
+         'bio': 'Sir Ian McKellen is an English actor known for fantasy and Shakespearean roles.',
+         'birth_date': date(1939, 5, 25),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Ian_McKellen_by_Gage_Skidmore.jpg'},
+        {'full_name': 'Jesse Eisenberg', 'bio': 'Jesse Eisenberg is an American actor and playwright.',
+         'birth_date': date(1983, 10, 5),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/1/13/Jesse_Eisenberg_2012.jpg'},
+        {'full_name': 'Andrew Garfield', 'bio': 'Andrew Garfield is an English-American actor.',
+         'birth_date': date(1983, 8, 20),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Andrew_Garfield_at_2011_Le_C%C3%A9sar_Awards.jpg'},
+        {'full_name': 'Jodie Foster', 'bio': 'Jodie Foster is an American actress, director, and producer.',
+         'birth_date': date(1962, 11, 19),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Jodie_Foster_2011.jpg'},
+        {'full_name': 'Anthony Hopkins', 'bio': 'Sir Anthony Hopkins is a Welsh actor, director, and composer.',
+         'birth_date': date(1937, 12, 31),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Anthony_Hopkins_2010.jpg'},
+        {'full_name': 'Mark Hamill', 'bio': 'Mark Hamill is an American actor and voice artist.',
+         'birth_date': date(1951, 9, 25),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Mark_Hamill_%282014%29.jpg'},
+        {'full_name': 'Harrison Ford', 'bio': 'Harrison Ford is an American actor and film producer.',
+         'birth_date': date(1942, 7, 13),
+         'photo_url': 'https://upload.wikimedia.org/wikipedia/commons/9/97/Harrison_Ford_2018.jpg'},
     ]
 
     actors = []
@@ -339,19 +408,20 @@ def create_sample_actors():
     print(f"Created {len(actors)} actors")
     return actors
 
+
 def create_movie_actor_relationships(movies, actors):
     """Create correct relationships between movies and actors"""
     movie_actor_mapping = [
-        ( 0, [ 0,  1]),  # Shawshank: Morgan Freeman, Tim Robbins
-        ( 1, [ 2,  3]),  # Godfather: Marlon Brando, Al Pacino
-        ( 2, [ 4,  5]),  # Dark Knight: Christian Bale, Heath Ledger
-        ( 3, [ 6,  7]),  # Pulp Fiction: John Travolta, Samuel L. Jackson
-        ( 4, [10, 11]),  # Schindler's List: Liam Neeson, Ben Kingsley
-        ( 5, [ 8, 12]),  # Inception: Leonardo DiCaprio, Joseph Gordon-Levitt
-        ( 6, [ 9, 13]),  # Forrest Gump: Tom Hanks, Robin Wright
-        ( 7, [14, 15]),  # The Matrix: Keanu Reeves, Laurence Fishburne
-        ( 8, [16, 17]),  # Goodfellas: Robert De Niro, Ray Liotta
-        ( 9, [18, 19]),  # Interstellar: Matthew McConaughey, Anne Hathaway
+        (0, [0, 1]),  # Shawshank: Morgan Freeman, Tim Robbins
+        (1, [2, 3]),  # Godfather: Marlon Brando, Al Pacino
+        (2, [4, 5]),  # Dark Knight: Christian Bale, Heath Ledger
+        (3, [6, 7]),  # Pulp Fiction: John Travolta, Samuel L. Jackson
+        (4, [10, 11]),  # Schindler's List: Liam Neeson, Ben Kingsley
+        (5, [8, 12]),  # Inception: Leonardo DiCaprio, Joseph Gordon-Levitt
+        (6, [9, 13]),  # Forrest Gump: Tom Hanks, Robin Wright
+        (7, [14, 15]),  # The Matrix: Keanu Reeves, Laurence Fishburne
+        (8, [16, 17]),  # Goodfellas: Robert De Niro, Ray Liotta
+        (9, [18, 19]),  # Interstellar: Matthew McConaughey, Anne Hathaway
         (10, [20, 21]),  # Fight Club: Brad Pitt, Edward Norton
         (11, [22, 23]),  # LOTR: Fellowship: Elijah Wood, Ian McKellen
         (12, [24, 25]),  # The Social Network: Jesse Eisenberg, Andrew Garfield
@@ -374,50 +444,81 @@ def create_movie_actor_relationships(movies, actors):
     print(f"Created {len(relationships)} movie-actor relationships")
     return relationships
 
+
 def create_sample_users():
     """Create sample users for testing"""
     users_data = [
         # US Users (8 users)
-        {'email': 'john.doe@example.com',     'full_name': 'John Doe',       'country': 'US', 'city': 'New York',     'auth_provider': 'local'},
-        {'email': 'sarah.wilson@example.com', 'full_name': 'Sarah Wilson',   'country': 'US', 'city': 'Los Angeles',  'auth_provider': 'local'},
-        {'email': 'mike.johnson@example.com', 'full_name': 'Mike Johnson',   'country': 'US', 'city': 'Chicago',      'auth_provider': 'local'},
-        {'email': 'lisa.brown@example.com',   'full_name': 'Lisa Brown',     'country': 'US', 'city': 'Miami',        'auth_provider': 'local'},
-        {'email': 'david.miller@example.com', 'full_name': 'David Miller',   'country': 'US', 'city': 'Seattle',      'auth_provider': 'local'},
-        {'email': 'emma.davis@example.com',   'full_name': 'Emma Davis',     'country': 'US', 'city': 'Boston',       'auth_provider': 'local'},
-        {'email': 'ryan.garcia@example.com',  'full_name': 'Ryan Garcia',    'country': 'US', 'city': 'Phoenix',      'auth_provider': 'local'},
-        {'email': 'sophia.martinez@example.com', 'full_name': 'Sophia Martinez', 'country': 'US', 'city': 'Denver',   'auth_provider': 'local'},
-        
-        # UK Users (6 users)  
-        {'email': 'jane.smith@example.com',   'full_name': 'Jane Smith',     'country': 'UK', 'city': 'London',       'auth_provider': 'local'},
-        {'email': 'james.thompson@example.com', 'full_name': 'James Thompson', 'country': 'UK', 'city': 'Manchester',   'auth_provider': 'local'},
-        {'email': 'olivia.white@example.com', 'full_name': 'Olivia White',   'country': 'UK', 'city': 'Birmingham',   'auth_provider': 'local'},
-        {'email': 'william.jones@example.com', 'full_name': 'William Jones',  'country': 'UK', 'city': 'Liverpool',    'auth_provider': 'local'},
-        {'email': 'charlotte.evans@example.com', 'full_name': 'Charlotte Evans', 'country': 'UK', 'city': 'Edinburgh',    'auth_provider': 'local'},
-        {'email': 'george.taylor@example.com', 'full_name': 'George Taylor',  'country': 'UK', 'city': 'Bristol',      'auth_provider': 'local'},
-        
+        {'email': 'john.doe@example.com', 'full_name': 'John Doe', 'country': 'US', 'city': 'New York',
+         'auth_provider': 'local'},
+        {'email': 'sarah.wilson@example.com', 'full_name': 'Sarah Wilson', 'country': 'US', 'city': 'Los Angeles',
+         'auth_provider': 'local'},
+        {'email': 'mike.johnson@example.com', 'full_name': 'Mike Johnson', 'country': 'US', 'city': 'Chicago',
+         'auth_provider': 'local'},
+        {'email': 'lisa.brown@example.com', 'full_name': 'Lisa Brown', 'country': 'US', 'city': 'Miami',
+         'auth_provider': 'local'},
+        {'email': 'david.miller@example.com', 'full_name': 'David Miller', 'country': 'US', 'city': 'Seattle',
+         'auth_provider': 'local'},
+        {'email': 'emma.davis@example.com', 'full_name': 'Emma Davis', 'country': 'US', 'city': 'Boston',
+         'auth_provider': 'local'},
+        {'email': 'ryan.garcia@example.com', 'full_name': 'Ryan Garcia', 'country': 'US', 'city': 'Phoenix',
+         'auth_provider': 'local'},
+        {'email': 'sophia.martinez@example.com', 'full_name': 'Sophia Martinez', 'country': 'US', 'city': 'Denver',
+         'auth_provider': 'local'},
+
+        # UK Users (6 users)
+        {'email': 'jane.smith@example.com', 'full_name': 'Jane Smith', 'country': 'UK', 'city': 'London',
+         'auth_provider': 'local'},
+        {'email': 'james.thompson@example.com', 'full_name': 'James Thompson', 'country': 'UK', 'city': 'Manchester',
+         'auth_provider': 'local'},
+        {'email': 'olivia.white@example.com', 'full_name': 'Olivia White', 'country': 'UK', 'city': 'Birmingham',
+         'auth_provider': 'local'},
+        {'email': 'william.jones@example.com', 'full_name': 'William Jones', 'country': 'UK', 'city': 'Liverpool',
+         'auth_provider': 'local'},
+        {'email': 'charlotte.evans@example.com', 'full_name': 'Charlotte Evans', 'country': 'UK', 'city': 'Edinburgh',
+         'auth_provider': 'local'},
+        {'email': 'george.taylor@example.com', 'full_name': 'George Taylor', 'country': 'UK', 'city': 'Bristol',
+         'auth_provider': 'local'},
+
         # Turkey Users (5 users)
-        {'email': 'ahmed.hassan@example.com', 'full_name': 'Ahmed Hassan',   'country': 'TR', 'city': 'Istanbul',     'auth_provider': 'local'},
-        {'email': 'fatma.yilmaz@example.com', 'full_name': 'Fatma Yılmaz',   'country': 'TR', 'city': 'Ankara',       'auth_provider': 'local'},
-        {'email': 'mehmet.demir@example.com', 'full_name': 'Mehmet Demir',   'country': 'TR', 'city': 'İzmir',        'auth_provider': 'local'},
-        {'email': 'ayse.kaya@example.com',    'full_name': 'Ayşe Kaya',      'country': 'TR', 'city': 'Bursa',        'auth_provider': 'local'},
-        {'email': 'ozan.celik@example.com',   'full_name': 'Ozan Çelik',     'country': 'TR', 'city': 'Antalya',      'auth_provider': 'local'},
-        
+        {'email': 'ahmed.hassan@example.com', 'full_name': 'Ahmed Hassan', 'country': 'TR', 'city': 'Istanbul',
+         'auth_provider': 'local'},
+        {'email': 'fatma.yilmaz@example.com', 'full_name': 'Fatma Yılmaz', 'country': 'TR', 'city': 'Ankara',
+         'auth_provider': 'local'},
+        {'email': 'mehmet.demir@example.com', 'full_name': 'Mehmet Demir', 'country': 'TR', 'city': 'İzmir',
+         'auth_provider': 'local'},
+        {'email': 'ayse.kaya@example.com', 'full_name': 'Ayşe Kaya', 'country': 'TR', 'city': 'Bursa',
+         'auth_provider': 'local'},
+        {'email': 'ozan.celik@example.com', 'full_name': 'Ozan Çelik', 'country': 'TR', 'city': 'Antalya',
+         'auth_provider': 'local'},
+
         # Germany Users (4 users)
-        {'email': 'hans.mueller@example.com', 'full_name': 'Hans Müller',    'country': 'DE', 'city': 'Berlin',       'auth_provider': 'local'},
-        {'email': 'anna.schmidt@example.com', 'full_name': 'Anna Schmidt',   'country': 'DE', 'city': 'Munich',       'auth_provider': 'local'},
-        {'email': 'klaus.weber@example.com',  'full_name': 'Klaus Weber',    'country': 'DE', 'city': 'Hamburg',      'auth_provider': 'local'},
-        {'email': 'petra.wagner@example.com', 'full_name': 'Petra Wagner',   'country': 'DE', 'city': 'Frankfurt',    'auth_provider': 'local'},
-        
+        {'email': 'hans.mueller@example.com', 'full_name': 'Hans Müller', 'country': 'DE', 'city': 'Berlin',
+         'auth_provider': 'local'},
+        {'email': 'anna.schmidt@example.com', 'full_name': 'Anna Schmidt', 'country': 'DE', 'city': 'Munich',
+         'auth_provider': 'local'},
+        {'email': 'klaus.weber@example.com', 'full_name': 'Klaus Weber', 'country': 'DE', 'city': 'Hamburg',
+         'auth_provider': 'local'},
+        {'email': 'petra.wagner@example.com', 'full_name': 'Petra Wagner', 'country': 'DE', 'city': 'Frankfurt',
+         'auth_provider': 'local'},
+
         # France Users (4 users)
-        {'email': 'pierre.dubois@example.com', 'full_name': 'Pierre Dubois',  'country': 'FR', 'city': 'Paris',        'auth_provider': 'local'},
-        {'email': 'marie.martin@example.com',  'full_name': 'Marie Martin',   'country': 'FR', 'city': 'Lyon',         'auth_provider': 'local'},
-        {'email': 'jean.bernard@example.com',  'full_name': 'Jean Bernard',   'country': 'FR', 'city': 'Marseille',    'auth_provider': 'local'},
-        {'email': 'claire.rousseau@example.com', 'full_name': 'Claire Rousseau', 'country': 'FR', 'city': 'Toulouse',     'auth_provider': 'local'},
-        
+        {'email': 'pierre.dubois@example.com', 'full_name': 'Pierre Dubois', 'country': 'FR', 'city': 'Paris',
+         'auth_provider': 'local'},
+        {'email': 'marie.martin@example.com', 'full_name': 'Marie Martin', 'country': 'FR', 'city': 'Lyon',
+         'auth_provider': 'local'},
+        {'email': 'jean.bernard@example.com', 'full_name': 'Jean Bernard', 'country': 'FR', 'city': 'Marseille',
+         'auth_provider': 'local'},
+        {'email': 'claire.rousseau@example.com', 'full_name': 'Claire Rousseau', 'country': 'FR', 'city': 'Toulouse',
+         'auth_provider': 'local'},
+
         # Canada Users (3 users)
-        {'email': 'alex.taylor@example.com',   'full_name': 'Alex Taylor',    'country': 'CA', 'city': 'Toronto',      'auth_provider': 'local'},
-        {'email': 'sophie.martin@example.com', 'full_name': 'Sophie Martin',  'country': 'CA', 'city': 'Vancouver',    'auth_provider': 'local'},
-        {'email': 'lucas.brown@example.com',   'full_name': 'Lucas Brown',    'country': 'CA', 'city': 'Montreal',     'auth_provider': 'local'},
+        {'email': 'alex.taylor@example.com', 'full_name': 'Alex Taylor', 'country': 'CA', 'city': 'Toronto',
+         'auth_provider': 'local'},
+        {'email': 'sophie.martin@example.com', 'full_name': 'Sophie Martin', 'country': 'CA', 'city': 'Vancouver',
+         'auth_provider': 'local'},
+        {'email': 'lucas.brown@example.com', 'full_name': 'Lucas Brown', 'country': 'CA', 'city': 'Montreal',
+         'auth_provider': 'local'},
     ]
 
     users = []
@@ -431,14 +532,15 @@ def create_sample_users():
     print(f"Created {len(users)} users")
     return users
 
+
 def create_sample_ratings(movies, users):
     """Create sample ratings and comments with realistic distribution"""
     import random
-    
+
     # More realistic rating distribution weights
     # Weights for ratings 1-10 (1=worst, 10=best)
     rating_weights = [1, 2, 3, 8, 12, 15, 20, 18, 12, 9]  # Most ratings are 6-8
-    
+
     # More varied comments
     comments_positive = [
         "Absolutely brilliant! A masterpiece of cinema.",
@@ -452,7 +554,7 @@ def create_sample_ratings(movies, users):
         "Phenomenal movie, highly recommended!",
         "A timeless classic that never gets old."
     ]
-    
+
     comments_neutral = [
         "Good movie, worth watching.",
         "Decent film with some great moments.",
@@ -463,7 +565,7 @@ def create_sample_ratings(movies, users):
         "Well done but didn't blow me away.",
         "Solid movie, met my expectations."
     ]
-    
+
     comments_negative = [
         "Not my cup of tea, didn't enjoy it.",
         "Overhyped, disappointed with the result.",
@@ -473,7 +575,7 @@ def create_sample_ratings(movies, users):
         "Expected more from this film.",
         "Didn't live up to the hype."
     ]
-    
+
     ratings = []
     for user in users:
         # Each user rates 8-12 movies (more data for better distributions)
@@ -481,7 +583,7 @@ def create_sample_ratings(movies, users):
         for movie in random.sample(movies, min(num_ratings, len(movies))):
             # Use weighted random choice for more realistic rating distribution
             rating_value = random.choices(range(1, 11), weights=rating_weights)[0]
-            
+
             # Choose comment based on rating
             comment = None
             if random.random() < 0.7:  # 70% chance of having a comment
@@ -491,7 +593,7 @@ def create_sample_ratings(movies, users):
                     comment = random.choice(comments_neutral)
                 else:
                     comment = random.choice(comments_negative)
-            
+
             rating = Rating(
                 movie_id=movie.id,
                 user_id=user.id,
@@ -506,6 +608,7 @@ def create_sample_ratings(movies, users):
     print(f"Created {len(ratings)} ratings")
     return ratings
 
+
 def update_movie_scores(movies):
     """Update cached movie scores based on ratings"""
     from app.services.movie_service import MovieService
@@ -513,6 +616,7 @@ def update_movie_scores(movies):
     for m in movies:
         svc.update_movie_rating(str(m.id))
     print("Updated movie scores")
+
 
 def create_popularity_snapshots(movies):
     """Create initial popularity snapshots"""
@@ -522,6 +626,7 @@ def create_popularity_snapshots(movies):
         print("Created popularity snapshots")
     else:
         print("Failed to create popularity snapshots")
+
 
 def seed_database():
     """Seeds the database with sample data."""
@@ -539,7 +644,7 @@ def seed_database():
     db.session.query(Actor).delete()
     db.session.query(User).delete()
     db.session.commit()
-    
+
     movies = create_sample_movies()
     actors = create_sample_actors()
     categories = create_sample_categories()
@@ -551,11 +656,13 @@ def seed_database():
     create_popularity_snapshots(movies)
     print("Database seeding completed successfully!")
 
+
 def main():
     """Main entry point for script."""
     app = create_app()
     with app.app_context():
         seed_database()
+
 
 if __name__ == '__main__':
     main()
