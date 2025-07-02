@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
+import os
+from werkzeug.utils import secure_filename
 
 from ..models import db, User, Movie, Watchlist
 from ..services.user_service import UserService
@@ -319,10 +321,17 @@ def update_user_profile():
     tags:
       - Users
     summary: Update user profile
-    description: Update the authenticated user's profile information
+    description: Update the authenticated user's profile information. Can accept JSON or multipart/form-data for profile picture uploads.
     security:
       - Bearer: []
+    consumes:
+      - application/json
+      - multipart/form-data
     parameters:
+      - in: formData
+        name: photo
+        type: file
+        description: The photo file to upload.
       - in: body
         name: profile_data
         required: true
@@ -388,19 +397,44 @@ def update_user_profile():
         
         if not user:
             return jsonify({'msg': 'User not found'}), 404
-        
-        data = request.get_json()
-        if not data:
+
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            data = request.form.to_dict()
+            photo_file = request.files.get('photo')
+        elif request.is_json:
+            data = request.get_json()
+            photo_file = None
+        else:
+            return jsonify({'msg': 'Unsupported Content-Type'}), 415
+
+        if not data and not photo_file:
             return jsonify({'msg': 'No data provided'}), 400
+
+        # Handle file upload
+        if photo_file:
+            filename = secure_filename(photo_file.filename)
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+
+            photo_path = os.path.join(upload_folder, filename)
+            photo_file.save(photo_path)
+            # In a real app, you would probably store a URL, not a local path
+            # For simplicity, we save the path relative to the app.
+            # You might want to serve these files statically.
+            user.photo_url = photo_path
         
-        # Update allowed fields
+        # Update allowed fields from JSON or form data
         allowed_fields = ['full_name', 'country', 'city', 'photo_url']
         for field in allowed_fields:
             if field in data:
+                # Special handling for photo_url if a file is also uploaded
+                if field == 'photo_url' and photo_file:
+                    continue # The file upload takes precedence
                 setattr(user, field, data[field])
         
         # Validate country code if provided
-        if 'country' in data:
+        if 'country' in data and data['country']:
             from ..utils.validators import validate_country_code
             if not validate_country_code(data['country']):
                 return jsonify({'msg': 'Invalid country code'}), 400

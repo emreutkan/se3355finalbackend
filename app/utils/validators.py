@@ -31,6 +31,8 @@ def validate_password(password):
 
 def validate_country_code(country_code):
     """Validate ISO-3166-1 alpha-2 country code"""
+    if not country_code:
+        return True  # Allow empty country code
     return bool(re.match(r'^[A-Z]{2}$', country_code))
 
 def validate_rating(rating):
