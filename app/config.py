@@ -48,7 +48,7 @@ class Config:
 
 
     BACKEND_URL = os.environ.get('PRODUCTION_BACKEND_URL', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
-    FRONTEND_URL = os.environ.get('PRODUCTION_FRONTEND_URL', 'https://proud-ground-0a0435f03.2.azurestaticapps.net')
+    FRONTEND_URL = os.environ.get('PRODUCTION_FRONTEND_URL', 'https://thankful-cliff-012dd3803.1.azurestaticapps.net')
 
 
     # Google OAuth configuration
