@@ -14,7 +14,7 @@ class Config:
     db_server = os.environ.get('DB_SERVER_NAME')
     db_login = os.environ.get('DB_ADMIN_LOGIN')
     db_password = os.environ.get('DB_PASSWORD')
-    db_name = os.environ.get('DB_DATABASE_NAME', 'imdbapp')
+    db_name = os.environ.get('DB_DATABASE_NAME', 'webdevfinaldb')
     
     if db_server and db_login and db_password:
         # Azure SQL Database connection (production)
@@ -82,7 +82,6 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG')
 
 # Configuration mapping

@@ -22,7 +22,7 @@ def load_config():
     os.environ.setdefault('DB_SERVER_NAME', 'webdevfinaldbs3355.database.windows.net')
     os.environ.setdefault('DB_ADMIN_LOGIN', 'your_admin')
     os.environ.setdefault('DB_PASSWORD', 'your_password')
-    os.environ.setdefault('DB_DATABASE_NAME', 'imdbapp')
+    os.environ.setdefault('DB_DATABASE_NAME', 'webdevfinaldb')
 
     # Unset MySQL-specific variables to avoid conflicts
     if 'DATABASE_URL' in os.environ:
