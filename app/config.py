@@ -77,7 +77,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING')
+    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+    LOG_TO_FILE = True
 
 class TestingConfig(Config):
     """Testing configuration"""

@@ -547,5 +547,9 @@ def get_user_ratings():
         }), 200
         
     except Exception as e:
-        current_app.logger.error(f"Get user ratings error: {str(e)}")
-        return jsonify({'msg': 'Internal server error'}), 500 
+        current_app.logger.error(f"👤 💥 Get user ratings error: {str(e)}", exc_info=True)
+        return jsonify({
+            'msg': 'Failed to retrieve user ratings',
+            'details': f'Error: {str(e)}',
+            'user_id': current_user_id if 'current_user_id' in locals() else 'unknown'
+        }), 500 

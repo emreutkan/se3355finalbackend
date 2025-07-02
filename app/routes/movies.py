@@ -2,10 +2,12 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import desc, func, and_
 from sqlalchemy.orm import joinedload
+from datetime import datetime
 
 from ..models import db, Movie, Actor, MovieActor, Rating, User, PopularitySnapshot, Watchlist, MovieCategory
 from ..services.movie_service import MovieService
 from ..utils.validators import validate_rating
+from ..utils.logger import get_movies_logger, log_validation_error, log_business_logic_error, log_database_operation
 
 movies_bp = Blueprint('movies', __name__)
 movie_service = MovieService()
@@ -343,8 +345,12 @@ def get_movie_detail(movie_id):
         return jsonify({'movie': movie_dict}), 200
         
     except Exception as e:
-        current_app.logger.error(f"Get movie detail error: {str(e)}")
-        return jsonify({'msg': 'Internal server error'}), 500
+        current_app.logger.error(f"🎬 💥 Get movie detail error: {str(e)}", exc_info=True)
+        return jsonify({
+            'msg': 'Failed to retrieve movie details',
+            'details': f'Error: {str(e)}',
+            'movie_id': movie_id
+        }), 500
 
 @movies_bp.route('', methods=['POST'])
 @jwt_required()
@@ -615,8 +621,12 @@ def get_movie_ratings(movie_id):
         }), 200
         
     except Exception as e:
-        current_app.logger.error(f"Get movie ratings error: {str(e)}")
-        return jsonify({'msg': 'Internal server error'}), 500
+        current_app.logger.error(f"🎬 💥 Get movie ratings error: {str(e)}", exc_info=True)
+        return jsonify({
+            'msg': 'Failed to retrieve movie ratings',
+            'details': f'Error: {str(e)}',
+            'movie_id': movie_id
+        }), 500
 
 @movies_bp.route('/<movie_id>/ratings', methods=['POST'])
 @jwt_required()
@@ -715,64 +725,147 @@ def rate_movie(movie_id):
       500:
         description: Internal server error
     """
+    movies_logger = get_movies_logger()
+    
     try:
+        movies_logger.info(f"🎬 RATING REQUEST | Movie ID: {movie_id}")
+        
+        # Get current user
         current_user_id = get_jwt_identity()
+        movies_logger.info(f"🎬 User ID from JWT: {current_user_id}")
+        
+        if not current_user_id:
+            log_validation_error('jwt_identity', current_user_id, 'No user ID found in JWT token', '/ratings')
+            return jsonify({'msg': 'Authentication required', 'details': 'Invalid or missing authentication token'}), 401
+        
+        # Validate and get user
         user = User.query.get(current_user_id)
-        
         if not user:
-            return jsonify({'msg': 'User not found'}), 404
+            log_validation_error('user_lookup', current_user_id, 'User not found in database', '/ratings')
+            return jsonify({'msg': 'User not found', 'details': f'User ID {current_user_id} does not exist'}), 404
         
+        movies_logger.info(f"🎬 User found: {user.email} ({user.full_name})")
+        
+        # Validate and get movie
         movie = Movie.query.get(movie_id)
         if not movie:
-            return jsonify({'msg': 'Movie not found'}), 404
+            log_validation_error('movie_lookup', movie_id, 'Movie not found in database', '/ratings')
+            return jsonify({'msg': 'Movie not found', 'details': f'Movie ID {movie_id} does not exist'}), 404
         
+        movies_logger.info(f"🎬 Movie found: {movie.title} ({movie.year})")
+        
+        # Get and validate request data
         data = request.get_json()
-        if not data or 'rating' not in data:
-            return jsonify({'msg': 'Rating is required'}), 400
+        if not data:
+            log_validation_error('request_body', None, 'No JSON data provided', '/ratings')
+            return jsonify({'msg': 'Invalid request', 'details': 'Request body must contain JSON data'}), 400
         
-        if not validate_rating(data['rating']):
-            return jsonify({'msg': 'Rating must be between 1 and 10'}), 400
+        if 'rating' not in data:
+            log_validation_error('rating_field', data, 'Rating field missing from request', '/ratings')
+            return jsonify({'msg': 'Rating is required', 'details': 'The "rating" field is required in the request body'}), 400
+        
+        rating_value = data['rating']
+        comment = data.get('comment', '')
+        
+        movies_logger.info(f"🎬 Rating data: value={rating_value}, comment_length={len(comment) if comment else 0}")
+        
+        # Validate rating value
+        if not validate_rating(rating_value):
+            log_validation_error('rating_value', rating_value, 'Rating value out of valid range', '/ratings')
+            return jsonify({
+                'msg': 'Invalid rating', 
+                'details': f'Rating must be between 1 and 10, received: {rating_value}'
+            }), 400
         
         # Check if user has already rated this movie
+        movies_logger.info(f"🎬 Checking for existing rating...")
         existing_rating = Rating.query.filter_by(
             movie_id=movie_id,
             user_id=current_user_id
         ).first()
         
         if existing_rating:
-            # Update existing rating/comment - user can only have one rating per movie
-            existing_rating.rating = data['rating']
-            existing_rating.comment = data.get('comment')
+            movies_logger.info(f"🎬 Found existing rating: {existing_rating.rating} -> updating to {rating_value}")
+            # Update existing rating/comment
+            old_rating = existing_rating.rating
+            existing_rating.rating = rating_value
+            existing_rating.comment = comment
             rating = existing_rating
-            msg = 'Rating updated successfully'
+            msg = f'Rating updated successfully (was {old_rating}, now {rating_value})'
             status_code = 200
+            log_database_operation('UPDATE', 'ratings', str(existing_rating.id))
         else:
+            movies_logger.info(f"🎬 Creating new rating: {rating_value}")
             # Create new rating
-            rating = Rating(
-                movie_id=movie_id,
-                user_id=current_user_id,
-                rating=data['rating'],
-                comment=data.get('comment'),
-                voter_country=user.country
-            )
-            db.session.add(rating)
-            msg = 'Rating submitted successfully'
-            status_code = 201
+            try:
+                rating = Rating(
+                    movie_id=movie_id,
+                    user_id=current_user_id,
+                    rating=rating_value,
+                    comment=comment,
+                    voter_country=user.country or 'UN'  # Default to 'UN' if no country
+                )
+                db.session.add(rating)
+                msg = 'Rating submitted successfully'
+                status_code = 201
+                log_database_operation('CREATE', 'ratings', 'new')
+            except Exception as e:
+                log_business_logic_error('create_rating', f'movie_id={movie_id}, user_id={current_user_id}', e, '/ratings')
+                db.session.rollback()
+                return jsonify({
+                    'msg': 'Failed to create rating',
+                    'details': f'Database error: {str(e)}'
+                }), 500
         
-        db.session.commit()
+        # Commit the rating change
+        try:
+            movies_logger.info(f"🎬 Committing rating to database...")
+            db.session.commit()
+            movies_logger.info(f"🎬 ✅ Rating committed successfully")
+        except Exception as e:
+            log_business_logic_error('commit_rating', f'movie_id={movie_id}, user_id={current_user_id}', e, '/ratings')
+            db.session.rollback()
+            return jsonify({
+                'msg': 'Failed to save rating',
+                'details': f'Database commit error: {str(e)}'
+            }), 500
         
         # Update movie's cached average rating
-        movie_service.update_movie_rating(movie_id)
+        try:
+            movies_logger.info(f"🎬 Updating movie average rating...")
+            success = movie_service.update_movie_rating(movie_id)
+            if success:
+                movies_logger.info(f"🎬 ✅ Movie rating updated successfully")
+            else:
+                movies_logger.warning(f"🎬 ⚠️ Failed to update movie rating cache")
+        except Exception as e:
+            # Don't fail the request if rating cache update fails
+            movies_logger.error(f"🎬 ❌ Error updating movie rating cache: {str(e)}")
+        
+        movies_logger.info(f"🎬 ✅ RATING SUCCESS | User: {user.email} | Movie: {movie.title} | Rating: {rating_value}")
         
         return jsonify({
             'msg': msg,
-            'rating': rating.to_dict()
+            'rating': rating.to_dict(),
+            'success': True
         }), status_code
         
     except Exception as e:
+        movies_logger.error(f"🎬 💥 CRITICAL RATING ERROR: {str(e)}", exc_info=True)
+        movies_logger.error(f"🎬 💥 Request data: {getattr(request, 'json', 'No JSON')}")
+        movies_logger.error(f"🎬 💥 Movie ID: {movie_id}")
+        movies_logger.error(f"🎬 💥 User ID: {current_user_id if 'current_user_id' in locals() else 'Unknown'}")
+        
         db.session.rollback()
-        current_app.logger.error(f"Rate movie error: {str(e)}")
-        return jsonify({'msg': 'Internal server error'}), 500
+        log_business_logic_error('rate_movie_endpoint', f'movie_id={movie_id}', e, '/ratings')
+        
+        return jsonify({
+            'msg': 'Failed to process rating',
+            'details': f'An unexpected error occurred: {str(e)}',
+            'error_type': type(e).__name__,
+            'movie_id': movie_id,
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
 
 @movies_bp.route('/<movie_id>/ratings/me', methods=['GET'])
 @jwt_required()

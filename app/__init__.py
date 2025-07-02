@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from flasgger import Swagger
 import os
+from datetime import datetime
 
 from .config import Config
 from .utils.logger import setup_logging, log_request_info
@@ -247,24 +248,44 @@ def create_app():
     # Global error handlers
     @app.errorhandler(400)
     def bad_request(error):
-        return jsonify({'msg': 'Bad request'}), 400
+        app.logger.warning(f"❌ Bad Request: {str(error)}")
+        return jsonify({'msg': 'Bad request', 'details': str(error) if app.debug else None}), 400
     
     @app.errorhandler(401)
     def unauthorized(error):
-        return jsonify({'msg': 'Unauthorized'}), 401
+        app.logger.warning(f"🔐 Unauthorized access attempt: {str(error)}")
+        return jsonify({'msg': 'Unauthorized', 'details': 'Authentication required'}), 401
     
     @app.errorhandler(403)
     def forbidden(error):
-        return jsonify({'msg': 'Forbidden'}), 403
+        app.logger.warning(f"🚫 Forbidden access attempt: {str(error)}")
+        return jsonify({'msg': 'Forbidden', 'details': 'Insufficient permissions'}), 403
     
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({'msg': 'Resource not found'}), 404
+        app.logger.debug(f"🔍 Resource not found: {request.path}")
+        return jsonify({'msg': 'Resource not found', 'path': request.path}), 404
     
     @app.errorhandler(500)
     def internal_error(error):
-        app.logger.error(f"Internal server error: {str(error)}", exc_info=True)
-        return jsonify({'msg': 'Internal server error'}), 500
+        app.logger.error(f"💥 CRITICAL ERROR: {str(error)}", exc_info=True)
+        app.logger.error(f"💥 Request details: {request.method} {request.path}")
+        app.logger.error(f"💥 User: {getattr(request, 'user_id', 'Unknown')}")
+        
+        # In production, give more helpful error message
+        if app.config.get('API_ENVIRONMENT') == 'production':
+            return jsonify({
+                'msg': 'Internal server error', 
+                'details': 'The server encountered an error processing your request. Please try again or contact support.',
+                'error_id': str(error)[:100] if hasattr(error, '__str__') else 'unknown',
+                'timestamp': datetime.utcnow().isoformat()
+            }), 500
+        else:
+            return jsonify({
+                'msg': 'Internal server error',
+                'details': str(error),
+                'type': type(error).__name__
+            }), 500
     
     # JWT error handlers
     @jwt.expired_token_loader
