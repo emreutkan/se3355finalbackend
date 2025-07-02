@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
 from app import db
 from scripts.seed_data import seed_database
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -66,18 +66,36 @@ def reset_database():
         seed_database()
         current_app.logger.info("[+] Database seeded successfully.")
 
-        # Calculate popularity scores for all movies
-        current_app.logger.info("[-] Calculating movie popularity scores...")
+        # Ensure database is fully committed before popularity calculation
+        db.session.commit()
+
+        # Force calculate popularity scores for all movies (in case seed didn't work)
+        current_app.logger.info("[-] Ensuring movie popularity scores are calculated...")
         try:
             movie_service = MovieService()
-            popularity_success = movie_service.update_popularity_snapshots()
             
-            if popularity_success:
-                current_app.logger.info("[+] Movie popularity scores calculated successfully.")
-                return jsonify(message="Database has been successfully reset and seeded. Movie popularity scores calculated."), 200
+            # Check if any movies have null popularity first
+            from ..models import Movie, PopularitySnapshot
+            movies_without_popularity = db.session.query(Movie).outerjoin(
+                PopularitySnapshot, Movie.id == PopularitySnapshot.movie_id
+            ).filter(PopularitySnapshot.movie_id.is_(None)).count()
+            
+            current_app.logger.info(f"[-] Found {movies_without_popularity} movies without popularity scores")
+            
+            if movies_without_popularity > 0:
+                current_app.logger.info("[-] Recalculating popularity scores...")
+                popularity_success = movie_service.update_popularity_snapshots()
+                
+                if popularity_success:
+                    current_app.logger.info("[+] Movie popularity scores calculated successfully.")
+                    return jsonify(message="Database has been successfully reset and seeded. Movie popularity scores calculated."), 200
+                else:
+                    current_app.logger.warning("[!] Failed to calculate some movie popularity scores.")
+                    return jsonify(message="Database has been successfully reset and seeded. Warning: Some popularity scores may not have been calculated."), 200
             else:
-                current_app.logger.warning("[!] Failed to calculate some movie popularity scores.")
-                return jsonify(message="Database has been successfully reset and seeded. Warning: Some popularity scores may not have been calculated."), 200
+                current_app.logger.info("[+] All movies already have popularity scores.")
+                return jsonify(message="Database has been successfully reset and seeded. Movie popularity scores already calculated."), 200
+                
         except Exception as popularity_error:
             current_app.logger.error(f"[!] Error calculating popularity scores: {str(popularity_error)}")
             return jsonify(message="Database has been successfully reset and seeded. Warning: Popularity score calculation failed."), 200

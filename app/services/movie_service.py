@@ -164,20 +164,15 @@ class MovieService:
                     )
                     db.session.add(snapshot)
             
-            # Calculate ranks using window function
-            # Use text() construct for raw SQL execution
-            db.session.execute(text("""
-                UPDATE popularity_snapshots ps
-                JOIN (
-                    SELECT 
-                        movie_id, 
-                        snapshot_date,
-                        ROW_NUMBER() OVER (PARTITION BY snapshot_date ORDER BY score DESC) as row_num
-                    FROM popularity_snapshots
-                    WHERE snapshot_date = :today
-                ) ranked ON ps.movie_id = ranked.movie_id AND ps.snapshot_date = ranked.snapshot_date
-                SET ps.rank = ranked.row_num
-            """), {'today': today})
+            # Calculate ranks using SQLAlchemy (works on both MySQL and SQL Server)
+            # Get all snapshots for today ordered by score
+            snapshots_today = PopularitySnapshot.query.filter_by(
+                snapshot_date=today
+            ).order_by(PopularitySnapshot.score.desc()).all()
+            
+            # Update ranks
+            for rank, snapshot in enumerate(snapshots_today, 1):
+                snapshot.rank = rank
             
             db.session.commit()
             return True

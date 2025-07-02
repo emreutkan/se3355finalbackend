@@ -620,12 +620,28 @@ def update_movie_scores(movies):
 
 def create_popularity_snapshots(movies):
     """Create initial popularity snapshots"""
-    from app.services.movie_service import MovieService
-    svc = MovieService()
-    if svc.update_popularity_snapshots():
-        print("Created popularity snapshots")
-    else:
-        print("Failed to create popularity snapshots")
+    print("🔧 Starting popularity snapshots creation...")
+    try:
+        from app.services.movie_service import MovieService
+        svc = MovieService()
+        
+        print(f"📊 Calculating popularity for {len(movies)} movies...")
+        
+        # Ensure all data is committed before calculating popularity
+        db.session.commit()
+        
+        if svc.update_popularity_snapshots():
+            print("✅ Created popularity snapshots successfully")
+            # Verify the results
+            from app.models import PopularitySnapshot
+            count = PopularitySnapshot.query.count()
+            print(f"✅ Verified: {count} popularity snapshots in database")
+        else:
+            print("❌ Failed to create popularity snapshots")
+    except Exception as e:
+        print(f"💥 Error creating popularity snapshots: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 
 def seed_database():
