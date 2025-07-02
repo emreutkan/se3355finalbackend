@@ -12,21 +12,37 @@ class GoogleAuthService:
     def get_flow(self):
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
         auth_logger.info("Creating Google OAuth flow")
-        # Use the redirect URI from config
-        redirect_uri = current_app.config['GOOGLE_REDIRECT_URI']
+        
+        # Validate required configuration
+        client_id = current_app.config.get('GOOGLE_CLIENT_ID')
+        client_secret = current_app.config.get('GOOGLE_CLIENT_SECRET')
+        redirect_uri = current_app.config.get('GOOGLE_REDIRECT_URI')
+        
+        if not client_id:
+            auth_logger.error("GOOGLE_CLIENT_ID is not configured")
+            return None
+        if not client_secret:
+            auth_logger.error("GOOGLE_CLIENT_SECRET is not configured")
+            return None
+        if not redirect_uri:
+            auth_logger.error("GOOGLE_REDIRECT_URI is not configured")
+            return None
+            
+        auth_logger.info(f"Using redirect_uri: {redirect_uri}")
+        auth_logger.info(f"Client ID configured: {client_id[:10]}..." if client_id else "Client ID missing")
         
         client_config = {
             "web": {
-                "client_id": current_app.config['GOOGLE_CLIENT_ID'],
-                "client_secret": current_app.config['GOOGLE_CLIENT_SECRET'],
+                "client_id": client_id,
+                "client_secret": client_secret,
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
                 "redirect_uris": [redirect_uri]
             }
         }
         try:
-            flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-                'client_secret.json',
+            flow = google_auth_oauthlib.flow.Flow.from_client_config(
+                client_config,
                 scopes=[
                     'https://www.googleapis.com/auth/userinfo.profile',
                     'https://www.googleapis.com/auth/userinfo.email',
@@ -42,14 +58,26 @@ class GoogleAuthService:
 
     def get_tokens(self, authorization_response_url: str):
         auth_logger.info(f"Attempting to fetch Google OAuth tokens with response URL: {authorization_response_url}")
+        
+        if not authorization_response_url:
+            auth_logger.error("Empty authorization response URL provided")
+            return None
+            
         flow = self.get_flow()
         if not flow:
+            auth_logger.error("Could not create OAuth flow")
             return None
+            
         try:
             # The state is not being used here, which can be a security risk.
             # For now, we proceed as is to debug the current problem.
+            auth_logger.info("Calling flow.fetch_token with authorization response")
             flow.fetch_token(authorization_response=authorization_response_url)
             credentials = flow.credentials
+            
+            if not credentials:
+                auth_logger.error("No credentials returned from flow.fetch_token")
+                return None
             
             # Extracting token data to be stored or used
             tokens = {

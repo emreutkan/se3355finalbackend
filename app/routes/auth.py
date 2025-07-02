@@ -494,3 +494,25 @@ def get_current_user():
     except Exception as e:
         current_app.logger.error(f"Get current user error: {str(e)}")
         return jsonify({'msg': 'Internal server error'}), 500
+
+@auth_bp.route('/google/config-check')
+def google_config_check():
+    """Diagnostic endpoint to check Google OAuth configuration"""
+    try:
+        config_status = {
+            'google_client_id_configured': bool(current_app.config.get('GOOGLE_CLIENT_ID')),
+            'google_client_secret_configured': bool(current_app.config.get('GOOGLE_CLIENT_SECRET')),
+            'google_redirect_uri': current_app.config.get('GOOGLE_REDIRECT_URI'),
+            'backend_url': current_app.config.get('BACKEND_URL'),
+            'frontend_url': current_app.config.get('FRONTEND_URL')
+        }
+        
+        if config_status['google_client_id_configured']:
+            client_id = current_app.config.get('GOOGLE_CLIENT_ID')
+            config_status['client_id_preview'] = f"{client_id[:10]}..." if client_id else None
+        
+        return jsonify(config_status), 200
+        
+    except Exception as e:
+        auth_logger.error(f"Config check error: {e}", exc_info=True)
+        return jsonify({'error': 'Failed to check configuration'}), 500
