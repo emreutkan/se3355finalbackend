@@ -28,14 +28,9 @@ def create_app():
     migrate.init_app(app, db)
     CORS(app)
     
-    # Determine API host based on environment
-    api_environment = os.environ.get('API_ENVIRONMENT', 'local')
-    if api_environment == 'production':
-        api_host = os.environ.get('PRODUCTION_API_HOST', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
-        schemes = ["https", "http"]
-    else:
-        api_host = f"https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
-        schemes = ["http", "https"]
+    # Use production API directly with HTTPS only
+    api_host = "be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
+    api_environment = "production"
     
     # Initialize Swagger for API documentation
     swagger_config = {
@@ -70,7 +65,7 @@ def create_app():
         },
         "host": api_host,
         "basePath": "/api",
-        "schemes": schemes,
+        "schemes": ["https"],
         "securityDefinitions": {
             "Bearer": {
                 "type": "apiKey",
@@ -195,10 +190,10 @@ def create_app():
                   example: "IMDB Clone API is running"
                 environment:
                   type: string
-                  example: "local"
+                  example: "production"
                 host:
                   type: string
-                  example: "localhost:8000"
+                  example: "be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
         """
         return jsonify({
             'status': 'healthy',
@@ -225,28 +220,27 @@ def create_app():
               properties:
                 environment:
                   type: string
-                  example: "local"
+                  example: "production"
                 api_host:
                   type: string
-                  example: "localhost:8000"
+                  example: "be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
                 schemes:
                   type: array
                   items:
                     type: string
-                  example: ["http", "https"]
+                  example: ["https"]
                 swagger_url:
                   type: string
-                  example: "http://localhost:8000/swagger/"
+                  example: "https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net/swagger/"
                 base_path:
                   type: string
                   example: "/api"
         """
-        scheme = schemes[0]  # Primary scheme
         return jsonify({
             'environment': api_environment,
             'api_host': api_host,
-            'schemes': schemes,
-            'swagger_url': f"{scheme}://{api_host}/swagger/",
+            'schemes': ["https"],
+            'swagger_url': f"https://{api_host}/swagger/",
             'base_path': '/api'
         }), 200
 

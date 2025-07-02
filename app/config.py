@@ -68,20 +68,6 @@ class Config:
     
     # API Environment configuration
     PRODUCTION_API_HOST = os.environ.get('PRODUCTION_API_HOST', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
-    
-    @staticmethod
-    def get_api_host():
-        """Get the appropriate API host based on environment"""
-        return "https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
-    
-    @staticmethod
-    def get_api_schemes():
-        """Get the appropriate schemes based on environment"""
-        api_environment = os.environ.get('API_ENVIRONMENT', 'local')
-        if api_environment == 'production':
-            return ["https", "http"]
-        else:
-            return ["http", "https"]
 
 class DevelopmentConfig(Config):
     """Development configuration"""
