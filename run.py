@@ -9,7 +9,7 @@ from app import create_app
 
 # --- Configuration Selection ---
 # Comment out the line below to use Azure SQL Database
-USE_LOCAL_MYSQL = True
+USE_LOCAL_MYSQL = False
 # -----------------------------
 
 def load_config(use_local_mysql):
