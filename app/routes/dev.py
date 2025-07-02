@@ -6,6 +6,7 @@ from sqlalchemy import text
 from datetime import datetime
 
 from ..models import User, Movie, Rating
+from ..services.movie_service import MovieService
 from ..utils.logger import get_movies_logger
 from ..utils.validators import validate_rating
 
@@ -65,7 +66,21 @@ def reset_database():
         seed_database()
         current_app.logger.info("[+] Database seeded successfully.")
 
-        return jsonify(message="Database has been successfully reset and seeded."), 200
+        # Calculate popularity scores for all movies
+        current_app.logger.info("[-] Calculating movie popularity scores...")
+        try:
+            movie_service = MovieService()
+            popularity_success = movie_service.update_popularity_snapshots()
+            
+            if popularity_success:
+                current_app.logger.info("[+] Movie popularity scores calculated successfully.")
+                return jsonify(message="Database has been successfully reset and seeded. Movie popularity scores calculated."), 200
+            else:
+                current_app.logger.warning("[!] Failed to calculate some movie popularity scores.")
+                return jsonify(message="Database has been successfully reset and seeded. Warning: Some popularity scores may not have been calculated."), 200
+        except Exception as popularity_error:
+            current_app.logger.error(f"[!] Error calculating popularity scores: {str(popularity_error)}")
+            return jsonify(message="Database has been successfully reset and seeded. Warning: Popularity score calculation failed."), 200
 
     except Exception as e:
         current_app.logger.error(f"[!] Database reset failed: {str(e)}")
