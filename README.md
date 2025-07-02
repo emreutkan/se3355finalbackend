@@ -1,3 +1,17 @@
+# Important
+
+- We need to wake up the Backend/Database before testing due to free tier limitations on Azure SQL
+
+```
+curl -X POST "https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net/api/dev/reset-database" -H "accept: application/json" -d ""
+```
+
+or through /swagger
+
+<img width="1465" alt="image" src="https://github.com/user-attachments/assets/8bb202f8-e5f9-4bb7-840c-6fce3a4f558a" />
+
+
+
 # 🚀 Live Deployment
 
 ## Backend API
