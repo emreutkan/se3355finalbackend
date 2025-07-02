@@ -46,12 +46,10 @@ class Config:
     # API Environment configuration
     API_ENVIRONMENT = os.environ.get('API_ENVIRONMENT', 'local')
 
-    if API_ENVIRONMENT == 'production':
-        BACKEND_URL = os.environ.get('PRODUCTION_BACKEND_URL', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
-        FRONTEND_URL = os.environ.get('PRODUCTION_FRONTEND_URL', 'https://proud-ground-0a0435f03.2.azurestaticapps.net')
-    else:
-        BACKEND_URL = os.environ.get('LOCAL_BACKEND_URL', 'http://localhost:8000')
-        FRONTEND_URL = os.environ.get('LOCAL_FRONTEND_URL', 'http://localhost:4200')
+
+    BACKEND_URL = os.environ.get('PRODUCTION_BACKEND_URL', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
+    FRONTEND_URL = os.environ.get('PRODUCTION_FRONTEND_URL', 'https://proud-ground-0a0435f03.2.azurestaticapps.net')
+
 
     # Google OAuth configuration
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
@@ -69,16 +67,12 @@ class Config:
     LOG_BACKUP_COUNT = int(os.environ.get('LOG_BACKUP_COUNT', 5))
     
     # API Environment configuration
-    PRODUCTION_API_HOST = os.environ.get('PRODUCTION_API_HOST', 'be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
+    PRODUCTION_API_HOST = os.environ.get('PRODUCTION_API_HOST', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
     
     @staticmethod
     def get_api_host():
         """Get the appropriate API host based on environment"""
-        api_environment = os.environ.get('API_ENVIRONMENT', 'local')
-        if api_environment == 'production':
-            return os.environ.get('PRODUCTION_API_HOST', 'be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
-        else:
-            return f"localhost:{os.environ.get('FLASK_PORT', '8000')}"
+        return "https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net"
     
     @staticmethod
     def get_api_schemes():

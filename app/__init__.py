@@ -31,7 +31,7 @@ def create_app():
     # Determine API host based on environment
     api_environment = os.environ.get('API_ENVIRONMENT', 'local')
     if api_environment == 'production':
-        api_host = os.environ.get('PRODUCTION_API_HOST', 'be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
+        api_host = os.environ.get('PRODUCTION_API_HOST', 'https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net')
         schemes = ["https", "http"]
     else:
         api_host = f"localhost:{os.environ.get('FLASK_PORT', '8000')}"
