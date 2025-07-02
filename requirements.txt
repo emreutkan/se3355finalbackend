@@ -139,6 +139,8 @@ pyjwt==2.10.1
     # via flask-jwt-extended
 pymysql==1.1.0
     # via -r requirements.in
+pyodbc==5.0.1
+    # via -r requirements.in
 pyparsing==3.2.3
     # via httplib2
 pytest==8.0.0
