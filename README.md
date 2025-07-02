@@ -1,3 +1,15 @@
+# 🚀 Live Deployment
+
+## Backend API
+- **Live URL**: https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net/
+- **API Documentation**: https://be984984-aphkd5f2e7ake9ey.westeurope-01.azurewebsites.net/swagger
+
+## Frontend Application
+- **Live URL**: https://thankful-cliff-012dd3803.1.azurestaticapps.net/
+- **Repository**: https://github.com/emreutkan/se3355website
+
+---
+
 # IMDB Clone API
 
 A comprehensive movie database REST API with user authentication, ratings, reviews, and search functionality. Built with Flask and designed to handle both local development and Azure cloud deployment.
